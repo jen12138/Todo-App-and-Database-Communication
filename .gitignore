@@ -32,6 +32,11 @@ yarn-error.*
 
 # local env files
 .env*.local
+TodoApi/appsettings.Development.json
+
+# .NET
+**/bin/
+**/obj/
 
 # typescript
 *.tsbuildinfo
