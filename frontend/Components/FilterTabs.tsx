@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import type { FilterValue } from "../types";
+import type { FilterValue } from "../../../types/types";
 
 type FilterTabsProps = {
   filter: FilterValue;

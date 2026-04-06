@@ -1,20 +1,19 @@
-import { useRouter } from "expo-router";
+import { Link } from "expo-router";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function WelcomeScreen() {
-  const router = useRouter();
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.card}>
         <Text style={styles.title}>Welcome to the App!</Text>
-        <Pressable
-          style={({ pressed }) => [styles.button, pressed && { opacity: 0.8 }]}
-          onPress={() => router.push("/calendar")}
-        >
+        <Link href="/calendar" asChild>
+          <Pressable style={({ pressed }) => [styles.button, pressed && { opacity: 0.8 }]}>
           <Text style={styles.buttonText}>GO TO TODO PAGE</Text>
-        </Pressable>
+           </Pressable>
+        </Link>
+          <Text style={styles.buttonText}>GO TO TODO PAGE</Text>
       </View>
     </SafeAreaView>
   );

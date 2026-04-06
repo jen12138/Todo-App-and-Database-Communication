@@ -1,40 +1,39 @@
-import styles from "./calendar.styles";
 import { useState } from "react";
-import { View, Text, FlatList, ActivityIndicator, Pressable } from "react-native";
+import { useForm } from "react-hook-form";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { useForm, Controller } from "react-hook-form";
-
-import { FilterTabs } from "@/features/todos/components/FilterTabs";
-import type { Todo } from "@/types/todo";
-
-
-import { TodoCard } from "@/Components/TodoCard";
-import { AddTodoModal } from "@/Components/AddTodoModal";
+import type { Todo } from "../../types/todo";
+import { AddTodoModal } from "../Components/AddTodoModal";
+import { FilterTabs } from "../Components/FilterTabs";
+import { TodoCard } from "../Components/TodoCard";
 import {
   useAddTodoMutation,
   useDeleteTodoMutation,
-  useTodosQuery,
   useToggleTodoMutation,
-} from "@/features/todos/hooks";
+  useTodosQuery,
+} from "../features/todos/hooks";
+import styles from "./calendar.styles";
 
-
- export type TodoFormValues = {
+export type TodoFormValues = {
   title: string;
   description: string;
 };
 
-
-
 export default function CalendarScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   const { control, handleSubmit, reset, watch } = useForm({
-    defaultValues:{ title:"", description:"" }
-  }) 
+    defaultValues: { title: "", description: "" },
+  });
 
   const titleValue = watch("title");
-  const descriptionValue = watch("description")
+  const descriptionValue = watch("description");
 
   const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
 
@@ -53,12 +52,12 @@ export default function CalendarScreen() {
   const deleteTodoMutation = useDeleteTodoMutation();
   const toggleTodoMutation = useToggleTodoMutation();
 
-  const activeCount = todos.filter((t) => !t.completed).length;
-  const completedCount = todos.filter((t) => t.completed).length;
+  const activeCount = todos.filter((t) => !t.isCompleted).length;
+  const completedCount = todos.filter((t) => t.isCompleted).length;
 
   const filteredTodos = todos.filter((todo) => {
-    if (filter === "active") return !todo.completed;
-    if (filter === "completed") return todo.completed;
+    if (filter === "active") return !todo.isCompleted;
+    if (filter === "completed") return todo.isCompleted;
     return true;
   });
 
@@ -86,7 +85,7 @@ export default function CalendarScreen() {
   }
 
   function handleAddTodo(values: TodoFormValues) {
-    const {title, description } =values;
+    const { title, description } = values;
     if (!(title.trim() && description.trim())) return;
 
     addTodoMutation.mutate(
@@ -98,7 +97,7 @@ export default function CalendarScreen() {
         onError: (err) => {
           alert(err instanceof Error ? err.message : "Failed to add todo");
         },
-      }
+      },
     );
   }
 
@@ -106,12 +105,15 @@ export default function CalendarScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <FilterTabs
-  filter={filter}
-  counts={{ all: todos.length, active: activeCount, completed: completedCount }}
-  onChange={setFilter}
-/>
+          filter={filter}
+          counts={{
+            all: todos.length,
+            active: activeCount,
+            completed: completedCount,
+          }}
+          onChange={setFilter}
+        />
 
-          
         <View>
           <Text style={styles.title}>Calendar / To-Do Page</Text>
           <Text style={styles.subtitle}>Your tasks for today</Text>
@@ -125,13 +127,11 @@ export default function CalendarScreen() {
       </View>
 
       <View style={styles.listContainer}>
-        {isLoading && (
+        {isLoading ? (
           <ActivityIndicator size="large" color="#247bff" testID="loading" />
-        )}
-
-        {!isLoading && isError ? (
+        ) : isError ? (
           <Text style={styles.errorText}>
-            {(error as Error)?.message ?? "Failed to load todos"}
+            {error?.message ?? "Failed to load todos"}
           </Text>
         ) : (
           <FlatList
@@ -145,9 +145,7 @@ export default function CalendarScreen() {
               />
             )}
             contentContainerStyle={
-              todos.length === 0 && !isLoading
-                ? styles.emptyListContent
-                : styles.listContent
+              todos.length === 0 ? styles.emptyListContent : styles.listContent
             }
             ListEmptyComponent={
               <Text style={styles.emptyText}>{emptyMessage}</Text>
@@ -163,7 +161,6 @@ export default function CalendarScreen() {
         onCancel={closeModal}
         disabled={!(titleValue.trim() && descriptionValue.trim())}
       />
-
     </SafeAreaView>
   );
 }
