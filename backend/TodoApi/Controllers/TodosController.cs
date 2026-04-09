@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TodoApi.Data;
 using TodoApi.DTOs;
-using TodoApi.Models;
+using TodoApi.Services;
 
 namespace TodoApi.Controllers;
 
@@ -10,52 +8,36 @@ namespace TodoApi.Controllers;
 [Route("api/[controller]")]
 public class TodosController : ControllerBase
 {
-    private readonly TodoDbContext _context;
+    private readonly ITodoService _todoService;
 
-    public TodosController(TodoDbContext context)
+    public TodosController(ITodoService todoService)
     {
-        _context = context;
+        _todoService = todoService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TodoDto>>> GetTodos()
     {
-        var todos = await _context.TaskItems.ToListAsync();
-        return Ok(todos.Select(MapToDto));
+        var todos = await _todoService.GetTodosAsync();
+        return Ok(todos);
     }
 
     [HttpPost]
     public async Task<ActionResult<TodoDto>> CreateTodo(CreateTodoDto createTodoDto)
     {
-        var taskItem = new TaskItem
-        {
-            Title = createTodoDto.Title,
-            Description = createTodoDto.Description,
-            IsCompleted = false,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        _context.TaskItems.Add(taskItem);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetTodos), new { id = taskItem.Id }, MapToDto(taskItem));
+        var createdTodo = await _todoService.CreateTodoAsync(createTodoDto);
+        return CreatedAtAction(nameof(GetTodos), new { id = createdTodo.Id }, createdTodo);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateTodo(int id, UpdateTodoDto updateTodoDto)
     {   
-        var existingTodo = await _context.TaskItems.FindAsync(id);
+        var updatedTodo = await _todoService.UpdateTodoAsync(id, updateTodoDto);
 
-        if (existingTodo == null)
+        if (updatedTodo == null)
         {
             return NotFound();
         }
-
-        existingTodo.Title = updateTodoDto.Title;
-        existingTodo.Description = updateTodoDto.Description;
-        existingTodo.IsCompleted = updateTodoDto.IsCompleted;
-
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }
@@ -63,28 +45,16 @@ public class TodosController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTodo(int id)
     {
-        var taskItem = await _context.TaskItems.FindAsync(id);
+        var deleted = await _todoService.DeleteTodoAsync(id);
 
-        if (taskItem == null)
+        if (!deleted)
         {
             return NotFound();
         }
 
-        _context.TaskItems.Remove(taskItem);
-        await _context.SaveChangesAsync();
-
         return NoContent();
     }
 
-    private static TodoDto MapToDto(TaskItem taskItem)
-    {
-        return new TodoDto
-        {
-            Id = taskItem.Id,
-            Title = taskItem.Title,
-            Description = taskItem.Description,
-            IsCompleted = taskItem.IsCompleted,
-            CreatedAt = taskItem.CreatedAt
-        };
-    }
+    
+    
 }
