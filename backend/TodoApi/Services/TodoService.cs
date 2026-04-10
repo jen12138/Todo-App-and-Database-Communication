@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using TodoApi.Data;
 using TodoApi.DTOs;
 using TodoApi.Models;
+using TodoApi.Exceptions;
+
 namespace TodoApi.Services;
 public class TodoService : ITodoService
 {
@@ -34,13 +36,13 @@ public class TodoService : ITodoService
         return MapToDto(taskItem);
     }
 
-    public async Task<TodoDto?> UpdateTodoAsync(int id, UpdateTodoDto updateTodoDto)
+    public async Task<TodoDto> UpdateTodoAsync(int id, UpdateTodoDto updateTodoDto)
     {
         var existingTodo = await _context.TaskItems.FindAsync(id);
 
         if (existingTodo == null)
         {
-            return null;
+            throw new TodoNotFoundException(id);
         }
 
         existingTodo.Title = updateTodoDto.Title;
@@ -52,19 +54,18 @@ public class TodoService : ITodoService
         return MapToDto(existingTodo);
     }
 
-    public async Task<bool> DeleteTodoAsync(int id)
+    public async Task DeleteTodoAsync(int id)
     {
         var taskItem = await _context.TaskItems.FindAsync(id);
 
         if (taskItem == null)
         {
-            return false;
+            throw new TodoNotFoundException(id);
         }
 
         _context.TaskItems.Remove(taskItem);
         await _context.SaveChangesAsync();
 
-        return true;
     }
 
     private static TodoDto MapToDto(TaskItem taskItem)
