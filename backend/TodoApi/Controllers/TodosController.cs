@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TodoApi.DTOs;
 using TodoApi.Services;
-using TodoApi.Exceptions;
 
 namespace TodoApi.Controllers;
 
@@ -33,30 +32,15 @@ public class TodosController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateTodo(int id, UpdateTodoDto updateTodoDto)
     {   
-        try
-        {
             await _todoService.UpdateTodoAsync(id, updateTodoDto);
             return NoContent();
-        }
-        catch (TodoNotFoundException)
-        {
-            return NotFound();
-        }
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTodo(int id)
     {
-        try
-        {
             await _todoService.DeleteTodoAsync(id);
             return NoContent();
-        }
-        catch (TodoNotFoundException)
-        {
-            return NotFound();
-        }
-
     }
     
 }

@@ -3,6 +3,7 @@ using TodoApi.Data;
 using TodoApi.DTOs;
 using TodoApi.Models;
 using TodoApi.Exceptions;
+using System.ComponentModel.DataAnnotations;
 
 namespace TodoApi.Services;
 public class TodoService : ITodoService
@@ -22,6 +23,10 @@ public class TodoService : ITodoService
 
     public async Task<TodoDto> CreateTodoAsync(CreateTodoDto createTodoDto)
     {
+        if (string.IsNullOrWhiteSpace(createTodoDto.Title))
+        {
+            throw new ValidationException("Title cannot be empty.");
+        }
         var taskItem = new TaskItem
         {
             Title = createTodoDto.Title,

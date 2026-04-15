@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
-import { Todo } from "@/types/todo";
+import { Todo } from "../../types/todo";
 
 type Props = {
   todo: Todo;
@@ -8,8 +8,8 @@ type Props = {
 };
 
 export function TodoCard({ todo, onDelete, onToggleComplete }: Props) {
-  const statusColor = todo.completed ? "#2ecc71" : "#f39c12";
-  const statusLabel = todo.completed ? "Done" : "Pending";
+  const statusColor = todo.isCompleted ? "#2ecc71" : "#f39c12";
+  const statusLabel = todo.isCompleted ? "Done" : "Pending";
 
   return (
     <View style={styles.card}>
@@ -26,13 +26,13 @@ export function TodoCard({ todo, onDelete, onToggleComplete }: Props) {
         <Pressable
           style={[
             styles.actionButton,
-            todo.completed && styles.disabledButton,
+            todo.isCompleted && styles.disabledButton,
           ]}
           onPress={() => onToggleComplete?.(todo)}
-          disabled={todo.completed}
+          disabled={todo.isCompleted}
         >
           <Text style={styles.actionText}>
-            {todo.completed ? "Completed" : "Mark Done"}
+            {todo.isCompleted ? "Completed" : "Mark Done"}
           </Text>
         </Pressable>
         <Pressable

@@ -34,7 +34,7 @@ export const useAddTodoMutation = () => {
       const response = await fetchWithTimeout(TODOS_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description, completed: false }),
+        body: JSON.stringify({ title, description, isCompleted: false }),
       });
 
       if (!response.ok) {
@@ -90,7 +90,7 @@ export const useToggleTodoMutation = () => {
         throw new Error("Failed to update todo");
       }
 
-      return { ...todo, completed: updatedCompleted };
+      return { ...todo, isCompleted: updatedCompleted };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: TODOS_QUERY_KEY });
